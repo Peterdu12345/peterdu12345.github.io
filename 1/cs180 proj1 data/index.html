@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Portfolio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CS180 project1: Images of the Russian Empire:
+        Colorizing the Prokudin-Gorskii photo collection</h1>
+
+    <p> This project is about using image processing techniques to take the BGR image stacked on top of each other, extract each of the colors, do alignment, place them on top of each other
+        and create a color image. The challenge of this project is to do the alignment of the images. 
+    </p>
+    <p> There are 2 parts in this project:</p>
+
+    <p> part 1: align smaller JPG images</p>
+    <p> part 2: align larger TIF images</p>
+
+    <p> In the first part, you may do exhausive search, eg a 15*15 window, and use a metric such as euclidean distance: sqrt(sum(sum((image1-image2).^2)))  
+        or Normalized Cross-Correlation (NCC).(image1./||image1|| and image2./||image2||). </p>
+    <p> **When implementing this, I ran into some issues that caused image not aligned, the shifts they give me are near "no shifts". Later through analysis of original vertically stacked pictures, I saw the borders
+        are bold, so it would have bias to align the borders to maximize dot product. In order to solve this, I have to crop the border by a factor of 0.05 when calculating distance. After that, 
+        the alignment works well. </p>
+    </p>
+    
+    <p> However, the exhausive search doesn't work well in larger tif images, because the shifts may be way greater than 15 pixels, can't set window to += 15. But set larger leads to squared too large</p>
+    <p> So in part 2, I implemented image pyramid to do multi-scale alignment. First downsample the image to a small size, do alignment on that small image, then upsample the shifts to the next scale, 
+        do a smaller search around that shift, repeat until reach the original size. </p>
+    <p> More detail: </p>
+    <p> base case: less than 300 pixels, I would just return the first part approach. if it's greater, I will recursive call it on half the image size, get the result shift, then multiply by 
+        2 to get the shift on the current scale, then do a smaller search around that shift, for example, I did +/- 8 pixels. </p>
+    </p>
+
+    <p> ** One issue arise: It doesn't align well with emir, melons, self_portrait, for some reason</p>
+    <p> ** to solve this, I align the images to green instead of blue, and it turned out pretty well.</p>
+    <!-- <a href="./1/index.html">Project 1</a> -->
+
+    <h2>Results</h2>
+
+    <!-- Class 1: small photos -->
+    <h3>Class 1: Small photos (aligned to Blue) Runtime below 1s</h3>
+    <div>
+        <figure>
+            <img src="results/cathedral.png" alt="Cathedral" width="400">
+            <figcaption>Cathedral — Shifts: R=(12,3), G=(3,2)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/monastery.png" alt="Monastery" width="400">
+            <figcaption>Monastery — Shifts: R=(3,2), G=(-3,-2)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/tobolsk.png" alt="Tobolsk" width="400">
+            <figcaption>Tobolsk — Shifts: R=(6,3), G=(3,2)</figcaption>
+        </figure>
+    </div>
+
+    <!-- Class 2: big photos aligned to Blue -->
+    <h3>Class 2: Big photos (aligned to Blue) Runtime all around 21-22s</h3>
+    <div>
+        <figure>
+            <img src="results/harvesters.png" alt="Harvesters" width="400">
+            <figcaption>Harvesters — Shifts: R=(60,16), G=(124,14)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/icon.png" alt="Icon" width="400">
+            <figcaption>Icon — Shifts: R=(89,23), G=(41,17)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/italil.png" alt="Italil" width="400">
+            <figcaption>Italil — Shifts: R=(76,35), G=(38,21)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/lastochikino.png" alt="Lastochikino" width="400">
+            <figcaption>Lastochikino — Shifts: R=(76,-9), G=(-3,-2)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/lugano.png" alt="Lugano" width="400">
+            <figcaption>Lugano — Shifts: R=(92,-29), G=(41,-17)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/siren.png" alt="Siren" width="400">
+            <figcaption>Siren — Shifts: R=(96,-25), G=(49,-7)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/three_generations.png" alt="Three Generations" width="400">
+            <figcaption>Three Generations — Shifts: R=(110,10), G=(55,13)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/emir1.png" alt="Emir1" width="400">
+            <figcaption>Emir1 — Shifts: R=(49,24), G=(69,42)</figcaption>
+            <b>NOTE: The well-aligned emir is below</b>
+        </figure>
+    </div>
+
+    <!-- Class 3: big photos aligned to Green -->
+    <h3>Class 3: Big photos (aligned to Green) Runtime around 21-22s</h3>
+    <div>
+        <figure>
+            <img src="results/emir2.png" alt="Emir2" width="400">
+            <figcaption>Emir2 — Shifts: R=(57,17), B=(-49,-24)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/melons2.png" alt="Melons2" width="400">
+            <figcaption>Melons2 — Shifts: R=(96,3), B=(-83,-9)</figcaption>
+        </figure>
+        <figure>
+            <img src="results/self_portrait2.png" alt="Self Portrait 2" width="400">
+            <figcaption>Self Portrait 2 — Shifts: R=(98,8), B=(-79,-29)</figcaption>
+        </figure>
+    </div>
+
+</body>
+</html>
